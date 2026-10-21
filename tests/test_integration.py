@@ -1,0 +1,104 @@
+"""Config flow and entity tests (pytest-homeassistant-custom-component)."""
+
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
+
+import pytest
+from homeassistant.core import HomeAssistant
+from homeassistant.data_entry_flow import FlowResultType
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+from custom_components.ligatracker.const import CONF_COMPETITIONS, CONF_TEAMS, DOMAIN
+from custom_components.ligatracker.model import TableRow
+
+
+@pytest.fixture(autouse=True)
+def _auto_enable(enable_custom_integrations):
+    return
+
+
+def _team(tid: int, name: str) -> dict:
+    return {"teamId": tid, "teamName": name, "shortName": name, "teamIconUrl": "data:image/png;base64,AAAA"}
+
+
+def _match(mid: int, kickoff: datetime, t1, t2, finished: bool, score=None) -> dict:
+    results = []
+    if score:
+        results = [
+            {"resultTypeID": 1, "resultOrderID": 1, "pointsTeam1": 0, "pointsTeam2": 0},
+            {"resultTypeID": 2, "resultOrderID": 2, "pointsTeam1": score[0], "pointsTeam2": score[1]},
+        ]
+    return {
+        "matchID": mid,
+        "matchDateTimeUTC": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "group": {"groupName": f"{mid}. Spieltag"},
+        "team1": t1,
+        "team2": t2,
+        "matchIsFinished": finished,
+        "matchResults": results,
+        "location": None,
+    }
+
+
+def _raw_matches() -> list[dict]:
+    now = datetime.now(timezone.utc)
+    vfb, bmg = _team(16, "VfB Stuttgart"), _team(87, "Borussia Mönchengladbach")
+    return [
+        _match(1, now - timedelta(days=6), bmg, vfb, True, (1, 2)),
+        _match(2, now + timedelta(days=2), vfb, bmg, False),
+    ]
+
+
+def _table() -> list[TableRow]:
+    return [TableRow(16, "VfB Stuttgart", 3, 12, 6, 4, 0, 2, 9, 5, 4)]
+
+
+async def test_config_flow(hass: HomeAssistant) -> None:
+    with patch(
+        "custom_components.ligatracker.api.OpenLigaDBClient.get_matches",
+        return_value=_raw_matches(),
+    ), patch("custom_components.ligatracker.async_setup_entry", return_value=True):
+        result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+        assert result["step_id"] == "user"
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_COMPETITIONS: ["bl1"]}
+        )
+        assert result["step_id"] == "teams"
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_TEAMS: ["16"]}
+        )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"] == {CONF_COMPETITIONS: ["bl1"], CONF_TEAMS: {"16": "VfB Stuttgart"}}
+
+
+async def test_entities(hass: HomeAssistant) -> None:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=DOMAIN,
+        data={CONF_COMPETITIONS: ["bl1"], CONF_TEAMS: {"16": "VfB Stuttgart"}},
+    )
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.ligatracker.api.OpenLigaDBClient.get_matches",
+        return_value=_raw_matches(),
+    ), patch(
+        "custom_components.ligatracker.api.OpenLigaDBClient.get_table",
+        return_value=_table(),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    last = hass.states.get("sensor.vfb_stuttgart_last_result")
+    assert last is not None and last.state == "2:1"  # Stuttgart won away: own goals first
+    assert last.attributes["result"] == "win"
+    assert last.attributes["opponent_logo"] is None  # data: URIs are dropped
+
+    nxt = hass.states.get("sensor.vfb_stuttgart_next_match")
+    assert nxt is not None and nxt.state != "unknown"
+    assert nxt.attributes["home"] is True
+
+    assert hass.states.get("sensor.vfb_stuttgart_match_status").state == "idle"
+    assert hass.states.get("sensor.vfb_stuttgart_table_position_bundesliga").state == "3"
+    assert hass.states.get("calendar.vfb_stuttgart") is not None

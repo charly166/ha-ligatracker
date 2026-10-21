@@ -1,0 +1,13 @@
+{
+  "domain": "ligatracker",
+  "name": "Liga Tracker",
+  "codeowners": ["@charly166"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/charly166/ha-ligatracker",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/charly166/ha-ligatracker/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

@@ -1,0 +1,73 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Wettbewerbe",
+        "description": "Wähle die Wettbewerbe, die verfolgt werden sollen. Die Daten stammen von OpenLigaDB (Community-gepflegt).",
+        "data": {
+          "competitions": "Wettbewerbe"
+        }
+      },
+      "teams": {
+        "title": "Mannschaften",
+        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren.",
+        "data": {
+          "teams": "Mannschaften"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OpenLigaDB ist nicht erreichbar.",
+      "no_competition": "Wähle mindestens einen Wettbewerb.",
+      "no_teams": "Für diese Auswahl wurden keine Mannschaften gefunden.",
+      "no_team": "Wähle mindestens eine Mannschaft."
+    },
+    "abort": {
+      "already_configured": "Liga Tracker ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Wettbewerbe",
+        "description": "Wähle die Wettbewerbe, die verfolgt werden sollen. Die Daten stammen von OpenLigaDB (Community-gepflegt).",
+        "data": {
+          "competitions": "Wettbewerbe"
+        }
+      },
+      "teams": {
+        "title": "Mannschaften",
+        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren.",
+        "data": {
+          "teams": "Mannschaften"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OpenLigaDB ist nicht erreichbar.",
+      "no_competition": "Wähle mindestens einen Wettbewerb.",
+      "no_teams": "Für diese Auswahl wurden keine Mannschaften gefunden.",
+      "no_team": "Wähle mindestens eine Mannschaft."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_match": {
+        "name": "Nächstes Spiel"
+      },
+      "last_match": {
+        "name": "Letztes Ergebnis"
+      },
+      "match_status": {
+        "name": "Spielstatus",
+        "state": {
+          "idle": "Kein Spiel",
+          "live": "Live"
+        }
+      },
+      "table_position": {
+        "name": "Tabellenplatz {competition}"
+      }
+    }
+  }
+}

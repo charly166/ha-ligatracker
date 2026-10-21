@@ -1,0 +1,73 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Competitions",
+        "description": "Choose the competitions to follow. Data comes from OpenLigaDB (community maintained).",
+        "data": {
+          "competitions": "Competitions"
+        }
+      },
+      "teams": {
+        "title": "Teams",
+        "description": "Choose one or more teams. Each team gets a calendar and sensors.",
+        "data": {
+          "teams": "Teams"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OpenLigaDB could not be reached.",
+      "no_competition": "Select at least one competition.",
+      "no_teams": "No teams found for this selection.",
+      "no_team": "Select at least one team."
+    },
+    "abort": {
+      "already_configured": "Liga Tracker is already set up."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Competitions",
+        "description": "Choose the competitions to follow. Data comes from OpenLigaDB (community maintained).",
+        "data": {
+          "competitions": "Competitions"
+        }
+      },
+      "teams": {
+        "title": "Teams",
+        "description": "Choose one or more teams. Each team gets a calendar and sensors.",
+        "data": {
+          "teams": "Teams"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OpenLigaDB could not be reached.",
+      "no_competition": "Select at least one competition.",
+      "no_teams": "No teams found for this selection.",
+      "no_team": "Select at least one team."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "next_match": {
+        "name": "Next match"
+      },
+      "last_match": {
+        "name": "Last result"
+      },
+      "match_status": {
+        "name": "Match status",
+        "state": {
+          "idle": "Idle",
+          "live": "Live"
+        }
+      },
+      "table_position": {
+        "name": "Table position {competition}"
+      }
+    }
+  }
+}
