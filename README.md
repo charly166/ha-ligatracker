@@ -21,7 +21,7 @@ Both can be changed later via *Configure*.
 ## Entities
 
 Per team (one device each): `calendar` (all matches, result appended to the title once
-finished), `Next match` (timestamp), `Last result` (own goals first, e.g. `2:1`), `Match status`
+finished), `Next match` (timestamp), `Last result` (own goals first, e.g. `2:1`), `Next/Last opponent`, `Next/Last competition`, `Match status`
 (`live` / `idle`) and `Table position <competition>` for leagues and league phases.
 Per selected league: one device with a `calendar` of all its matches.
 

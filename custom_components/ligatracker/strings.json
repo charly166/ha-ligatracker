@@ -65,6 +65,18 @@
       },
       "table_position": {
         "name": "Table position {competition}"
+      },
+      "next_opponent": {
+        "name": "Next opponent"
+      },
+      "next_competition": {
+        "name": "Next competition"
+      },
+      "last_opponent": {
+        "name": "Last opponent"
+      },
+      "last_competition": {
+        "name": "Last competition"
       }
     }
   }

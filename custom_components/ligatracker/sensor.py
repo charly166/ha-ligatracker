@@ -29,6 +29,10 @@ async def async_setup_entry(
             NextMatchSensor(coordinator, team_id),
             LastMatchSensor(coordinator, team_id),
             MatchStatusSensor(coordinator, team_id),
+            MatchFieldSensor(coordinator, team_id, "next", "opponent"),
+            MatchFieldSensor(coordinator, team_id, "next", "competition"),
+            MatchFieldSensor(coordinator, team_id, "last", "opponent"),
+            MatchFieldSensor(coordinator, team_id, "last", "competition"),
         ]
     async_add_entities(entities)
 
@@ -117,6 +121,50 @@ class LastMatchSensor(TeamEntity, SensorEntity):
             "score_away": match.final[1],
             "result": "win" if own > opp else "loss" if own < opp else "draw",
         }
+
+
+class MatchFieldSensor(TeamEntity, SensorEntity):
+    """Opponent or competition of the next / last match as a stand-alone sensor."""
+
+    def __init__(
+        self, coordinator: LigaTrackerCoordinator, team_id: int, which: str, field: str
+    ) -> None:
+        super().__init__(coordinator, team_id)
+        self._which = which
+        self._field = field
+        self._attr_translation_key = f"{which}_{field}"
+        self._attr_unique_id = f"{self._base_id}_{which}_{field}"
+
+    def _match(self) -> Match | None:
+        matches = self.coordinator.team_matches(self.team_id)
+        if self._which == "next":
+            return next_match(matches, dt_util.utcnow())
+        return last_match(matches)
+
+    @property
+    def native_value(self) -> str | None:
+        match = self._match()
+        if not match:
+            return None
+        if self._field == "competition":
+            return match.comp_name
+        return match.opponent(self.team_id).name
+
+    @property
+    def entity_picture(self) -> str | None:
+        match = self._match()
+        if match and self._field == "opponent":
+            return match.opponent(self.team_id).icon
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        match = self._match()
+        if not match:
+            return None
+        if self._field == "competition":
+            return {"matchday": match.group}
+        return {"home": match.is_home(self.team_id), "competition": match.comp_name}
 
 
 class MatchStatusSensor(TeamEntity, SensorEntity):

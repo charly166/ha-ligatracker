@@ -29,6 +29,8 @@ Pro Mannschaft entsteht ein Gerät mit:
 | `calendar.<team>` | Alle Spiele der Mannschaft in allen Wettbewerben. Nach Abpfiff steht das Ergebnis im Titel (z. B. „VfB Stuttgart 1:1 Atletico Madrid“). |
 | `sensor.<team>_nachstes_spiel` | Anstoßzeit des nächsten Spiels; Attribute: Gegner, Wettbewerb, Spieltag, Heim/Auswärts. |
 | `sensor.<team>_letztes_ergebnis` | Ergebnis des letzten Spiels aus Sicht der Mannschaft (eigene Tore zuerst, z. B. `2:1`); Attribut `result` = win/draw/loss. |
+| `sensor.<team>_nachster_gegner`, `_nachster_wettbewerb` | Gegner und Wettbewerb des nächsten Spiels (z. B. „Borussia Mönchengladbach“, „Bundesliga“). Der Gegner-Sensor zeigt das Vereinslogo als Bild. |
+| `sensor.<team>_letzter_gegner`, `_letzter_wettbewerb` | Gegner und Wettbewerb des letzten Spiels. |
 | `sensor.<team>_spielstatus` | `live` während eines Spiels, sonst `idle`; Attribut `score`. |
 | `sensor.<team>_tabellenplatz_<wettbewerb>` | Tabellenplatz inkl. Punkte, Tore usw. (Ligen und Ligaphase der Europapokale). |
 

@@ -51,6 +51,11 @@ def _raw_matches() -> list[dict]:
     ]
 
 
+async def _get_matches(self, shortcut: str, season: int) -> list[dict]:
+    """Only the Bundesliga has matches; everything else is empty."""
+    return _raw_matches() if shortcut == "bl1" else []
+
+
 def _table() -> list[TableRow]:
     return [TableRow(16, "VfB Stuttgart", 3, 12, 6, 4, 0, 2, 9, 5, 4)]
 
@@ -58,7 +63,7 @@ def _table() -> list[TableRow]:
 async def test_config_flow(hass: HomeAssistant) -> None:
     with patch(
         "custom_components.ligatracker.api.OpenLigaDBClient.get_matches",
-        return_value=_raw_matches(),
+        _get_matches,
     ), patch("custom_components.ligatracker.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
         assert result["step_id"] == "user"
@@ -84,7 +89,7 @@ async def test_entities(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
     with patch(
         "custom_components.ligatracker.api.OpenLigaDBClient.get_matches",
-        return_value=_raw_matches(),
+        _get_matches,
     ), patch(
         "custom_components.ligatracker.api.OpenLigaDBClient.get_table",
         return_value=_table(),
@@ -100,6 +105,11 @@ async def test_entities(hass: HomeAssistant) -> None:
     nxt = hass.states.get("sensor.vfb_stuttgart_next_match")
     assert nxt is not None and nxt.state != "unknown"
     assert nxt.attributes["home"] is True
+
+    assert hass.states.get("sensor.vfb_stuttgart_last_opponent").state == "Borussia Mönchengladbach"
+    assert hass.states.get("sensor.vfb_stuttgart_last_competition").state == "Bundesliga"
+    assert hass.states.get("sensor.vfb_stuttgart_next_opponent").state == "Borussia Mönchengladbach"
+    assert hass.states.get("sensor.vfb_stuttgart_next_competition").state == "Bundesliga"
 
     assert hass.states.get("sensor.vfb_stuttgart_match_status").state == "idle"
     assert hass.states.get("sensor.vfb_stuttgart_table_position_bundesliga").state == "3"
