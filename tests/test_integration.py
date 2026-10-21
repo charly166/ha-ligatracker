@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.ligatracker.const import CONF_COMPETITIONS, CONF_TEAMS, DOMAIN
+from custom_components.ligatracker.const import CONF_LEAGUES, CONF_TEAMS, DOMAIN
 from custom_components.ligatracker.model import TableRow
 
 
@@ -63,21 +63,23 @@ async def test_config_flow(hass: HomeAssistant) -> None:
         result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
         assert result["step_id"] == "user"
         result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], {CONF_COMPETITIONS: ["bl1"]}
-        )
-        assert result["step_id"] == "teams"
-        result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {CONF_TEAMS: ["16"]}
         )
+        assert result["step_id"] == "leagues"
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {CONF_LEAGUES: ["bl1"]}
+        )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["data"] == {CONF_COMPETITIONS: ["bl1"], CONF_TEAMS: {"16": "VfB Stuttgart"}}
+    assert result["title"] == "HA Liga Tracker"
+    assert result["data"] == {CONF_TEAMS: {"16": "VfB Stuttgart"}, CONF_LEAGUES: ["bl1"]}
 
 
 async def test_entities(hass: HomeAssistant) -> None:
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=DOMAIN,
-        data={CONF_COMPETITIONS: ["bl1"], CONF_TEAMS: {"16": "VfB Stuttgart"}},
+        version=2,
+        data={CONF_TEAMS: {"16": "VfB Stuttgart"}, CONF_LEAGUES: ["bl1"]},
     )
     entry.add_to_hass(hass)
     with patch(
@@ -102,3 +104,4 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert hass.states.get("sensor.vfb_stuttgart_match_status").state == "idle"
     assert hass.states.get("sensor.vfb_stuttgart_table_position_bundesliga").state == "3"
     assert hass.states.get("calendar.vfb_stuttgart") is not None
+    assert hass.states.get("calendar.bundesliga") is not None  # league calendar

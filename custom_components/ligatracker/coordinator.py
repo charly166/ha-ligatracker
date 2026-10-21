@@ -1,4 +1,4 @@
-"""Data update coordinator for Liga Tracker."""
+"""Data update coordinator for HA Liga Tracker."""
 
 from __future__ import annotations
 
@@ -13,8 +13,10 @@ from homeassistant.util import dt as dt_util
 
 from .api import CompetitionLoader, OpenLigaDBClient, OpenLigaDBError
 from .const import (
-    CONF_COMPETITIONS,
+    COMPETITIONS,
+    CONF_LEAGUES,
     CONF_TEAMS,
+    DISCOVERY_INTERVAL,
     DOMAIN,
     FULL_REFRESH_INTERVAL,
     IDLE_INTERVAL,
@@ -32,6 +34,8 @@ class LigaData:
 
 
 class LigaTrackerCoordinator(DataUpdateCoordinator[LigaData]):
+    """Fetches the competitions the selected teams play in plus the selected leagues."""
+
     config_entry: ConfigEntry
 
     def __init__(
@@ -44,38 +48,55 @@ class LigaTrackerCoordinator(DataUpdateCoordinator[LigaData]):
             name=DOMAIN,
             update_interval=IDLE_INTERVAL,
         )
-        self.competitions: list[str] = list(entry.data[CONF_COMPETITIONS])
         # team id -> display name
         self.teams: dict[int, str] = {int(k): v for k, v in entry.data[CONF_TEAMS].items()}
+        self.leagues: list[str] = [k for k in entry.data.get(CONF_LEAGUES, []) if k in COMPETITIONS]
         self._loader = CompetitionLoader(client)
+        self._relevant: set[str] | None = None
+        self._discovered: datetime | None = None
+        self._discovered_season: int | None = None
         self._last_full: datetime | None = None
 
     def team_matches(self, team_id: int) -> list[Match]:
-        """All known matches of a team across the selected competitions."""
-        out = [m for ms in (self.data.matches if self.data else {}).values() for m in ms if m.involves(team_id)]
+        """All known matches of a team across all competitions it plays in."""
+        out = [
+            m
+            for ms in (self.data.matches if self.data else {}).values()
+            for m in ms
+            if m.involves(team_id)
+        ]
         out.sort(key=lambda m: m.kickoff)
         return out
 
-    def _active_competitions(self, now: datetime) -> set[str]:
-        if not self.data:
+    def league_matches(self, key: str) -> list[Match]:
+        return self.data.matches.get(key, []) if self.data else []
+
+    def _is_tracked_active(self, m: Match, now: datetime) -> bool:
+        return m.is_active(now) and any(m.involves(t) for t in self.teams)
+
+    def _active_competitions(self, data: LigaData | None, now: datetime) -> set[str]:
+        if not data:
             return set()
-        return {
-            key
-            for key, ms in self.data.matches.items()
-            for m in ms
-            if m.is_active(now) and any(m.involves(t) for t in self.teams)
-        }
+        return {k for k, ms in data.matches.items() for m in ms if self._is_tracked_active(m, now)}
 
     async def _async_update_data(self) -> LigaData:
         now = dt_util.utcnow()
         season = current_season(dt_util.now())
-        active = self._active_competitions(now)
-        full = (
-            self._last_full is None
-            or not active
-            or now - self._last_full >= FULL_REFRESH_INTERVAL
+        discover = (
+            self._relevant is None
+            or self._discovered_season != season
+            or self._discovered is None
+            or now - self._discovered >= DISCOVERY_INTERVAL
         )
-        keys = self.competitions if full else [k for k in self.competitions if k in active]
+        active = self._active_competitions(self.data, now)
+        full = discover or not active or self._last_full is None or now - self._last_full >= FULL_REFRESH_INTERVAL
+
+        if discover:
+            keys = list(COMPETITIONS)
+        elif full:
+            keys = sorted(self._relevant or [])
+        else:
+            keys = sorted(active)
 
         data = LigaData(
             matches=dict(self.data.matches) if self.data else {},
@@ -91,17 +112,25 @@ class LigaTrackerCoordinator(DataUpdateCoordinator[LigaData]):
                 errors.append(str(err))
                 _LOGGER.debug("Update of %s failed: %s", key, err)
 
+        if discover and not errors:
+            self._relevant = {
+                key
+                for key, ms in data.matches.items()
+                if key in self.leagues or any(m.involves(t) for m in ms for t in self.teams)
+            }
+            self._discovered, self._discovered_season = now, season
+            # forget competitions that neither a team nor a league needs
+            data.matches = {k: v for k, v in data.matches.items() if k in self._relevant}
+            data.tables = {k: v for k, v in data.tables.items() if k in self._relevant}
+        elif discover:
+            # incomplete scan: keep whatever we got and retry next time
+            self._relevant = self._relevant or {k for k, v in data.matches.items() if v}
+
         if errors and not data.matches:
             raise UpdateFailed("; ".join(errors))
         if full and not errors:
             self._last_full = now
 
-        self.update_interval = LIVE_INTERVAL if self._active_competitions_in(data, now) else IDLE_INTERVAL
+        live = bool(self._active_competitions(data, now))
+        self.update_interval = LIVE_INTERVAL if live else IDLE_INTERVAL
         return data
-
-    def _active_competitions_in(self, data: LigaData, now: datetime) -> bool:
-        return any(
-            m.is_active(now) and any(m.involves(t) for t in self.teams)
-            for ms in data.matches.values()
-            for m in ms
-        )

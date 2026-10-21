@@ -1,4 +1,4 @@
-"""Constants for the Liga Tracker integration."""
+"""Constants for the HA Liga Tracker integration."""
 
 from __future__ import annotations
 
@@ -7,8 +7,9 @@ from typing import Final
 
 DOMAIN: Final = "ligatracker"
 
-CONF_COMPETITIONS: Final = "competitions"
 CONF_TEAMS: Final = "teams"
+CONF_LEAGUES: Final = "leagues"
+NAME: Final = "HA Liga Tracker"
 
 API_BASE: Final = "https://api.openligadb.de"
 ATTRIBUTION: Final = "Daten von OpenLigaDB (openligadb.de)"
@@ -25,6 +26,9 @@ LIVE_INTERVAL: Final = timedelta(seconds=60)
 # While a match is live only the affected competitions are refreshed; a full
 # refresh (all competitions + tables) still happens at least this often.
 FULL_REFRESH_INTERVAL: Final = timedelta(minutes=15)
+# Which competitions the selected teams play in is re-discovered this often
+# (all curated competitions are scanned, then only the relevant ones are polled).
+DISCOVERY_INTERVAL: Final = timedelta(hours=24)
 
 # Curated competitions. OpenLigaDB is community maintained and the shortcuts are
 # not consistent between seasons (e.g. "ucl", "ucl2026", "uel2026"), so each

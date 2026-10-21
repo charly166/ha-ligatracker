@@ -2,52 +2,50 @@
   "config": {
     "step": {
       "user": {
-        "title": "Wettbewerbe",
-        "description": "Wähle die Wettbewerbe, die verfolgt werden sollen. Die Daten stammen von OpenLigaDB (Community-gepflegt).",
-        "data": {
-          "competitions": "Wettbewerbe"
-        }
-      },
-      "teams": {
         "title": "Mannschaften",
-        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren.",
+        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren für alle ihre Wettbewerbe (Daten von OpenLigaDB, Community-gepflegt).",
         "data": {
           "teams": "Mannschaften"
+        }
+      },
+      "leagues": {
+        "title": "Ligen (optional)",
+        "description": "Wähle zusätzlich Ligen, um für jede Liga einen Kalender mit allen Partien zu erhalten.",
+        "data": {
+          "leagues": "Ligen"
         }
       }
     },
     "error": {
-      "cannot_connect": "OpenLigaDB ist nicht erreichbar.",
-      "no_competition": "Wähle mindestens einen Wettbewerb.",
-      "no_teams": "Für diese Auswahl wurden keine Mannschaften gefunden.",
       "no_team": "Wähle mindestens eine Mannschaft."
     },
     "abort": {
-      "already_configured": "Liga Tracker ist bereits eingerichtet."
+      "already_configured": "HA Liga Tracker ist bereits eingerichtet.",
+      "cannot_connect": "OpenLigaDB ist nicht erreichbar."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Wettbewerbe",
-        "description": "Wähle die Wettbewerbe, die verfolgt werden sollen. Die Daten stammen von OpenLigaDB (Community-gepflegt).",
-        "data": {
-          "competitions": "Wettbewerbe"
-        }
-      },
-      "teams": {
         "title": "Mannschaften",
-        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren.",
+        "description": "Wähle eine oder mehrere Mannschaften. Jede Mannschaft erhält einen Kalender und Sensoren für alle ihre Wettbewerbe (Daten von OpenLigaDB, Community-gepflegt).",
         "data": {
           "teams": "Mannschaften"
+        }
+      },
+      "leagues": {
+        "title": "Ligen (optional)",
+        "description": "Wähle zusätzlich Ligen, um für jede Liga einen Kalender mit allen Partien zu erhalten.",
+        "data": {
+          "leagues": "Ligen"
         }
       }
     },
     "error": {
-      "cannot_connect": "OpenLigaDB ist nicht erreichbar.",
-      "no_competition": "Wähle mindestens einen Wettbewerb.",
-      "no_teams": "Für diese Auswahl wurden keine Mannschaften gefunden.",
       "no_team": "Wähle mindestens eine Mannschaft."
+    },
+    "abort": {
+      "cannot_connect": "OpenLigaDB ist nicht erreichbar."
     }
   },
   "entity": {
