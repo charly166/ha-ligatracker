@@ -21,21 +21,26 @@ PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
 
 type LigaTrackerConfigEntry = ConfigEntry[LigaTrackerCoordinator]
 
-_CARD_URL = "/ligatracker_frontend/ligatracker-team-card.js"
+_CARD_FILES = ("ligatracker-team-card.js", "ligatracker-league-card.js")
+_CARD_BASE_URL = "/ligatracker_frontend"
 _DATA_CARD_REGISTERED = f"{DOMAIN}_card_registered"
 
 
 async def _async_register_card(hass: HomeAssistant) -> None:
-    """Serve the bundled team card and load it in the frontend (once per run)."""
+    """Serve the bundled cards and load them in the frontend (once per run)."""
     if hass.data.get(_DATA_CARD_REGISTERED):
         return
     hass.data[_DATA_CARD_REGISTERED] = True
-    path = Path(__file__).parent / "frontend" / "ligatracker-team-card.js"
+    folder = Path(__file__).parent / "frontend"
     await hass.http.async_register_static_paths(
-        [StaticPathConfig(_CARD_URL, str(path), cache_headers=False)]
+        [
+            StaticPathConfig(f"{_CARD_BASE_URL}/{name}", str(folder / name), cache_headers=False)
+            for name in _CARD_FILES
+        ]
     )
     version = (await async_get_integration(hass, DOMAIN)).version
-    add_extra_js_url(hass, f"{_CARD_URL}?v={version}")
+    for name in _CARD_FILES:
+        add_extra_js_url(hass, f"{_CARD_BASE_URL}/{name}?v={version}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: LigaTrackerConfigEntry) -> bool:

@@ -30,6 +30,15 @@ FULL_REFRESH_INTERVAL: Final = timedelta(minutes=15)
 # (all curated competitions are scanned, then only the relevant ones are polled).
 DISCOVERY_INTERVAL: Final = timedelta(hours=24)
 
+# Competition logos are not part of the OpenLigaDB data. They are public-domain wordmarks /
+# logos on Wikimedia Commons that the card loads directly in the browser.
+_COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/"
+
+
+def commons_logo(filename: str, width: int = 256) -> str:
+    return f"{_COMMONS}{filename.replace(' ', '_')}?width={width}"
+
+
 # Curated competitions. OpenLigaDB is community maintained and the shortcuts are
 # not consistent between seasons (e.g. "ucl", "ucl2026", "uel2026"), so each
 # competition lists candidate shortcuts and the one with the most matches wins.
@@ -58,4 +67,15 @@ COMPETITIONS: Final[dict[str, dict]] = {
         "shortcuts": ["DFBN", "DFBNAT2526", "dfb-wm26"],
         "table": False,
     },
+}
+
+COMPETITION_LOGOS: Final[dict[str, str]] = {
+    "bl1": commons_logo("Bundesliga logo.svg"),
+    "bl2": commons_logo("2. Bundesliga Wordmark.svg"),
+    "bl3": commons_logo("3. Liga Wordmark.svg"),
+    "dfb": commons_logo("DFB-Pokal Wordmark.svg"),
+    "ucl": commons_logo("UEFA Champions League logo.svg"),
+    "uel": commons_logo("UEFA Europa League logo (2024 version).svg"),
+    "uecl": commons_logo("UEFA Conference League logo (2024 version).svg"),
+    "nat": commons_logo("DFB-Logo 2025.svg"),
 }

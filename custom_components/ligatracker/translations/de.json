@@ -94,6 +94,9 @@
       },
       "overview": {
         "name": "Übersicht"
+      },
+      "league_overview": {
+        "name": "Spieltage"
       }
     },
     "image": {

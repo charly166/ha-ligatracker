@@ -141,7 +141,7 @@
 
     _logo(url) {
       return url
-        ? `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.style.visibility='hidden'">`
+        ? `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`
         : `<img alt="" style="visibility:hidden">`;
     }
 

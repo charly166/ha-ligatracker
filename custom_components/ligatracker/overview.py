@@ -5,17 +5,17 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from .const import COMPETITIONS
-from .model import Match, TableRow, last_match, live_match, next_match
+from .const import COMPETITION_LOGOS, COMPETITIONS
+from .model import Match, TableRow, last_match, live_match, next_match, select_matchdays
 
 # Domestic leagues come first ("Liga"), everything else is listed under "other competitions".
 LEAGUE_KEYS = ("bl1", "bl2", "bl3")
 
 
-def _match_dict(match: Match, team_id: int) -> dict[str, Any]:
+def _match_dict(match: Match, team_id: int | None) -> dict[str, Any]:
     score = match.final if match.finished else match.live
     result = None
-    if match.finished and match.final is not None:
+    if team_id is not None and match.finished and match.final is not None:
         own, opp = match.score_for(team_id, match.final) or (0, 0)
         result = "win" if own > opp else "loss" if own < opp else "draw"
     return {
@@ -29,8 +29,9 @@ def _match_dict(match: Match, team_id: int) -> dict[str, Any]:
         "kickoff": match.kickoff.isoformat(),
         "matchday": match.group,
         "venue": match.location,
-        "team_is_home": match.is_home(team_id),
+        "team_is_home": match.is_home(team_id) if team_id is not None else None,
         "result": result,
+        "finished": match.finished,
     }
 
 
@@ -76,4 +77,28 @@ def build_overview(
     return {
         "team": {"id": team_id, "name": team_name, "logo": team_logo},
         "competitions": competitions,
+    }
+
+
+def build_league_overview(key: str, matches: list[Match], now: datetime) -> dict[str, Any]:
+    """Last and next matchday of a competition (data of the league card)."""
+    last, nxt = select_matchdays(matches, now)
+
+    def day(ms: list[Match] | None) -> dict[str, Any] | None:
+        if not ms:
+            return None
+        return {
+            "name": ms[0].group,
+            "order": ms[0].group_order,
+            "matches": [{**_match_dict(m, None), "live": m.is_live(now)} for m in ms],
+        }
+
+    return {
+        "competition": {
+            "key": key,
+            "name": COMPETITIONS[key]["name"],
+            "logo": COMPETITION_LOGOS.get(key),
+        },
+        "last": day(last),
+        "next": day(nxt),
     }

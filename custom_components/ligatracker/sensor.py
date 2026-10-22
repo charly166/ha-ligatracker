@@ -14,9 +14,9 @@ from homeassistant.util import dt as dt_util
 from . import LigaTrackerConfigEntry
 from .const import COMPETITIONS
 from .coordinator import LigaTrackerCoordinator
-from .entity import TeamEntity
+from .entity import LeagueEntity, TeamEntity
 from .model import Match, last_match, live_match, next_match
-from .overview import build_overview
+from .overview import build_league_overview, build_overview
 
 
 async def async_setup_entry(
@@ -39,6 +39,7 @@ async def async_setup_entry(
             MatchFieldSensor(coordinator, team_id, "next", "home_away"),
             MatchFieldSensor(coordinator, team_id, "last", "home_away"),
         ]
+    entities += [LeagueOverviewSensor(coordinator, key) for key in coordinator.leagues]
     async_add_entities(entities)
 
     # Table sensors depend on which tables actually contain the team, so they are
@@ -217,6 +218,34 @@ class OverviewSensor(TeamEntity, SensorEntity):
     def native_value(self) -> int:
         """Number of competitions the team plays in."""
         return len(self._overview()["competitions"])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return self._overview()
+
+
+class LeagueOverviewSensor(LeagueEntity, SensorEntity):
+    """Last and next matchday of a league (data source of the league card)."""
+
+    _attr_translation_key = "league_overview"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _unrecorded_attributes = frozenset({"competition", "last", "next"})
+
+    def __init__(self, coordinator: LigaTrackerCoordinator, comp_key: str) -> None:
+        super().__init__(coordinator, comp_key)
+        self._attr_unique_id = f"{self._base_id}_matchdays"
+
+    def _overview(self) -> dict[str, Any]:
+        return build_league_overview(
+            self.comp_key, self.coordinator.league_matches(self.comp_key), dt_util.utcnow()
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Name of the next matchday (or the last one when the season is over)."""
+        overview = self._overview()
+        day = overview["next"] or overview["last"]
+        return day["name"] if day else None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

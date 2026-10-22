@@ -34,7 +34,7 @@ def _match(mid: int, kickoff: datetime, t1, t2, finished: bool, score=None) -> d
     return {
         "matchID": mid,
         "matchDateTimeUTC": kickoff.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "group": {"groupName": f"{mid}. Spieltag"},
+        "group": {"groupName": f"{mid}. Spieltag", "groupOrderID": mid},
         "team1": t1,
         "team2": t2,
         "matchIsFinished": finished,
@@ -134,6 +134,16 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert comp["last"]["team_is_home"] is False
     assert comp["next"]["home"] == "VfB Stuttgart" and comp["next"]["score"] is None
     assert comp["live"] is None
+
+    league = hass.states.get("sensor.bundesliga_matchdays")
+    assert league is not None and league.state == "2. Spieltag"  # next matchday
+    assert league.attributes["competition"]["name"] == "Bundesliga"
+    assert league.attributes["competition"]["logo"].startswith("https://commons.wikimedia.org/")
+    assert league.attributes["last"]["name"] == "1. Spieltag"
+    (played,) = league.attributes["last"]["matches"]
+    assert played["score"] == [1, 2] and played["finished"] is True
+    (upcoming,) = league.attributes["next"]["matches"]
+    assert upcoming["score"] is None and upcoming["finished"] is False
 
 
 async def test_deselected_team_and_league_are_removed(hass: HomeAssistant) -> None:

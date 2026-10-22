@@ -29,6 +29,7 @@ class Match:
     comp_name: str
     kickoff: datetime
     group: str
+    group_order: int
     team1: Team
     team2: Team
     finished: bool
@@ -113,6 +114,7 @@ def parse_match(raw: dict[str, Any], comp_key: str, comp_name: str) -> Match | N
         comp_name=comp_name,
         kickoff=kickoff,
         group=(raw.get("group") or {}).get("groupName") or "",
+        group_order=int((raw.get("group") or {}).get("groupOrderID") or 0),
         team1=team1,
         team2=team2,
         finished=finished,
@@ -157,3 +159,33 @@ def last_match(matches: list[Match]) -> Match | None:
 
 def live_match(matches: list[Match], now: datetime) -> Match | None:
     return next((m for m in matches if m.is_live(now)), None)
+
+
+def select_matchdays(
+    matches: list[Match], now: datetime
+) -> tuple[list[Match] | None, list[Match] | None]:
+    """Return (last matchday, next matchday) of a competition.
+
+    The next matchday is the one holding the earliest unfinished match that has not
+    long been due (so one postponed old match does not freeze the view); it may be
+    partly played. The last matchday is the latest earlier one with results.
+    """
+    groups: dict[int, list[Match]] = {}
+    for m in matches:
+        groups.setdefault(m.group_order, []).append(m)
+    upcoming = sorted(
+        (m for m in matches if not m.finished and m.kickoff + MATCH_WINDOW > now),
+        key=lambda m: m.kickoff,
+    )
+    next_order = upcoming[0].group_order if upcoming else None
+    played = [
+        order
+        for order, ms in groups.items()
+        if any(m.finished for m in ms) and (next_order is None or order < next_order)
+    ]
+    last_order = max(played) if played else None
+
+    def pick(order: int | None) -> list[Match] | None:
+        return sorted(groups[order], key=lambda m: m.kickoff) if order is not None else None
+
+    return pick(last_order), pick(next_order)

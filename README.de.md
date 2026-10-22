@@ -38,7 +38,7 @@ Pro Mannschaft entsteht ein Gerät mit:
 
 | `sensor.<team>_ubersicht` | Diagnose-Sensor mit allen Wettbewerben der Mannschaft als Attribut (Datenquelle der Karte). |
 
-Pro gewählter Liga entsteht ein Gerät mit einem Kalender (`calendar.<liga>`) aller Partien.
+Pro gewählter Liga entsteht ein Gerät mit einem Kalender (`calendar.<liga>`) aller Partien und einem Diagnose-Sensor „Spieltage“ (`sensor.<liga>_spieltage`) mit dem letzten und nächsten Spieltag (Datenquelle der Ligakarte).
 
 ## Mannschaftskarte
 
@@ -55,6 +55,26 @@ name: VfB Stuttgart                      # optional
 
 Im Karten-Editor erscheint sie als „Liga Tracker Mannschaftskarte“. Nach dem ersten Update
 einmal hart neu laden (Strg+F5).
+
+## Ligakarte
+
+Zeigt für eine gewählte Liga das Liga-Logo mit Namen als Überschrift und darunter alle Partien des
+**nächsten** oder **letzten** Spieltags, nach Tagen gruppiert, mit den Logos beider Mannschaften.
+Gespielte Partien zeigen das Ergebnis, noch offene die Anstoßzeit.
+
+```yaml
+type: custom:ligatracker-league-card
+entity: sensor.bundesliga_spieltage   # Spieltage-Sensor der Liga
+matchday: next                        # next (Standard) oder last
+name: Bundesliga                      # optional
+```
+
+Im Karten-Editor: „Liga Tracker Ligakarte“. Der Spieltag ist der mit der frühesten noch offenen
+Partie; läuft er schon teilweise, steht er unter „nächster“ (mit den bereits gespielten Ergebnissen)
+und der davor unter „letzter“. Die Liga muss im Setup unter „Ligen“ gewählt sein.
+
+Die Liga-Logos stammen von Wikimedia Commons (gemeinfreie Wortmarken bzw. Logos) und werden
+direkt im Browser geladen. OpenLigaDB selbst liefert keine Liga-Logos.
 
 ## Hinweise
 
