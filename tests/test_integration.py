@@ -123,3 +123,35 @@ async def test_entities(hass: HomeAssistant) -> None:
     logo = hass.states.get("image.vfb_stuttgart_logo")
     assert logo is not None and logo.state != "unavailable"
     assert hass.states.get("calendar.bundesliga") is not None  # league calendar
+
+
+async def test_deselected_team_and_league_are_removed(hass: HomeAssistant) -> None:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id=DOMAIN,
+        version=2,
+        data={
+            CONF_TEAMS: {"16": "VfB Stuttgart", "87": "Borussia Mönchengladbach"},
+            CONF_LEAGUES: ["bl1"],
+        },
+    )
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.ligatracker.api.OpenLigaDBClient.get_matches", _get_matches
+    ), patch(
+        "custom_components.ligatracker.api.OpenLigaDBClient.get_table", return_value=_table()
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        assert hass.states.get("calendar.borussia_monchengladbach") is not None
+        assert hass.states.get("calendar.bundesliga") is not None
+
+        hass.config_entries.async_update_entry(
+            entry, data={CONF_TEAMS: {"16": "VfB Stuttgart"}, CONF_LEAGUES: []}
+        )
+        await hass.async_block_till_done()
+
+    assert hass.states.get("calendar.vfb_stuttgart") is not None
+    assert hass.states.get("calendar.borussia_monchengladbach") is None
+    assert hass.states.get("calendar.bundesliga") is None
+    assert hass.states.get("sensor.borussia_monchengladbach_next_match") is None

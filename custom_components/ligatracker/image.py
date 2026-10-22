@@ -10,6 +10,7 @@ from homeassistant.util import dt as dt_util
 from . import LigaTrackerConfigEntry
 from .coordinator import LigaTrackerCoordinator
 from .entity import TeamEntity
+from .logos import get_logo_cache
 
 
 async def async_setup_entry(
@@ -33,13 +34,21 @@ class TeamLogo(TeamEntity, ImageEntity):
         self._attr_image_url = coordinator.team_icon(team_id)
         self._attr_image_last_updated = dt_util.utcnow()
 
+    async def async_image(self) -> bytes | None:
+        """Serve the logo from the disk cache; never hit the remote host on every request."""
+        if not (url := self._attr_image_url):
+            return None
+        if not (logo := await get_logo_cache(self.hass).get(url)):
+            return None
+        content, self._attr_content_type = logo
+        return content
+
     @callback
     def _handle_coordinator_update(self) -> None:
         url = self.coordinator.team_icon(self.team_id)
         if url != self._attr_image_url:
             self._attr_image_url = url
             self._attr_image_last_updated = dt_util.utcnow()
-            self._cached_image = None
         super()._handle_coordinator_update()
 
     @property
