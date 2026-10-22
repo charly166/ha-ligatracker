@@ -16,5 +16,14 @@ def test_bundled_logo_files_exist_and_are_png() -> None:
         assert COMPETITION_LOGOS[key] == f"/ligatracker_frontend/logos/{name}"
 
 
+def test_logos_are_square_so_the_image_entity_does_not_crop_them() -> None:
+    import struct
+
+    for key, name in BUNDLED_LOGOS.items():
+        width, height = struct.unpack(">II", (_LOGOS / name).read_bytes()[16:24])
+        assert width == height, f"{key}: {width}x{height}"
+
+
 def test_every_competition_has_a_logo() -> None:
     assert set(COMPETITION_LOGOS) == set(COMPETITIONS)
+    assert set(BUNDLED_LOGOS) == set(COMPETITIONS)

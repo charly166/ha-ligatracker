@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import LigaTrackerConfigEntry
-from .const import BUNDLED_LOGOS, COMPETITION_LOGOS
+from .const import BUNDLED_LOGOS
 from .coordinator import LigaTrackerCoordinator
 from .entity import LeagueEntity, TeamEntity
 from .logos import get_logo_cache
@@ -24,7 +24,7 @@ async def async_setup_entry(
     coordinator = entry.runtime_data
     async_add_entities(
         [TeamLogo(coordinator, team_id) for team_id in coordinator.teams]
-        + [LeagueLogo(coordinator, key) for key in coordinator.leagues if key in COMPETITION_LOGOS]
+        + [LeagueLogo(coordinator, key) for key in coordinator.leagues if key in BUNDLED_LOGOS]
     )
 
 
@@ -65,7 +65,7 @@ class TeamLogo(_CachedLogo, TeamEntity):
         return super().available and self._attr_image_url is not None
 
 
-class LeagueLogo(_CachedLogo, LeagueEntity):
+class LeagueLogo(LeagueEntity, ImageEntity):
     """Logo of a selected league (the league card uses it as header image)."""
 
     _attr_translation_key = "league_logo"
@@ -74,15 +74,11 @@ class LeagueLogo(_CachedLogo, LeagueEntity):
         LeagueEntity.__init__(self, coordinator, comp_key)
         ImageEntity.__init__(self, coordinator.hass)
         self._attr_unique_id = f"{self._base_id}_logo"
-        self._bundled = BUNDLED_LOGOS.get(comp_key)
-        # Bundled logos are read from the integration folder; the others come from the disk cache.
-        self._attr_image_url = None if self._bundled else COMPETITION_LOGOS[comp_key]
+        self._path = Path(__file__).parent / "logos" / BUNDLED_LOGOS[comp_key]
         self._attr_image_last_updated = dt_util.utcnow()
 
     async def async_image(self) -> bytes | None:
-        if not self._bundled:
-            return await super().async_image()
-        path = Path(__file__).parent / "logos" / self._bundled
-        content = await self.hass.async_add_executor_job(path.read_bytes)
+        """The logo ships with the integration; no download needed."""
+        content = await self.hass.async_add_executor_job(self._path.read_bytes)
         self._attr_content_type = infer_image_type(content) or "image/png"
         return content

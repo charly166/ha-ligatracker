@@ -31,16 +31,18 @@ FULL_REFRESH_INTERVAL: Final = timedelta(minutes=15)
 # (all curated competitions are scanned, then only the relevant ones are polled).
 DISCOVERY_INTERVAL: Final = timedelta(hours=24)
 
-# Competition logos are not part of the OpenLigaDB data. Logos in BUNDLED_LOGOS ship with the
-# integration (custom_components/ligatracker/logos/). The others are public-domain logos /
-# wordmarks on Wikimedia Commons as direct thumbnail URLs (Special:FilePath is rate-limited by
-# Wikimedia and answers HTTP 429); those are downloaded once and cached on disk.
-_THUMB = "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-
+# Competition logos are not part of the OpenLigaDB data. They ship with the integration
+# (custom_components/ligatracker/logos/, square PNGs with a white margin so that the image
+# entity does not crop them) and are served by Home Assistant itself.
 BUNDLED_LOGOS: Final[dict[str, str]] = {
     "bl1": "bl1.png",
     "bl2": "bl2.png",
+    "bl3": "bl3.png",
     "dfb": "dfb.png",
+    "ucl": "ucl.png",
+    "uel": "uel.png",
+    "uecl": "uecl.png",
+    "nat": "nat.png",
 }
 
 
@@ -74,16 +76,7 @@ COMPETITIONS: Final[dict[str, dict]] = {
     },
 }
 
-_REMOTE_LOGOS: Final[dict[str, str]] = {
-    "bl3": _THUMB + "e/ec/3._Liga_Wordmark.svg/330px-3._Liga_Wordmark.svg.png",
-    "ucl": _THUMB + "0/0a/UEFA_Champions_League_logo.svg/330px-UEFA_Champions_League_logo.svg.png",
-    "uel": _THUMB + "1/1b/UEFA_Europa_League_logo_%282024_version%29.svg/330px-UEFA_Europa_League_logo_%282024_version%29.svg.png",
-    "uecl": _THUMB + "2/26/UEFA_Conference_League_logo_%282024_version%29.svg/330px-UEFA_Conference_League_logo_%282024_version%29.svg.png",
-    "nat": _THUMB + "1/10/DFB-Logo_2025.svg/330px-DFB-Logo_2025.svg.png",
-}
-
-# Browser-facing URL of every competition logo (bundled ones are served by Home Assistant).
+# Browser-facing URL of every competition logo.
 COMPETITION_LOGOS: Final[dict[str, str]] = {
-    **_REMOTE_LOGOS,
-    **{key: f"{STATIC_BASE_URL}/logos/{name}" for key, name in BUNDLED_LOGOS.items()},
+    key: f"{STATIC_BASE_URL}/logos/{name}" for key, name in BUNDLED_LOGOS.items()
 }
