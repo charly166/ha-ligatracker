@@ -139,10 +139,17 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert league_logo is not None and league_logo.state != "unavailable"
     assert league_logo.attributes["entity_picture"].startswith("/api/image_proxy/image.bundesliga_league_logo")
 
+    # the bundled Bundesliga logo is served by the entity itself (a PNG from the integration)
+    from homeassistant.components.image import DATA_COMPONENT
+
+    logo_entity = hass.data[DATA_COMPONENT].get_entity("image.bundesliga_league_logo")
+    png = await logo_entity.async_image()
+    assert png is not None and png[1:4] == b"PNG" and logo_entity.content_type == "image/png"
+
     league = hass.states.get("sensor.bundesliga_matchdays")
     assert league is not None and league.state == "2. Spieltag"  # next matchday
     assert league.attributes["competition"]["name"] == "Bundesliga"
-    assert league.attributes["competition"]["logo"].startswith("https://upload.wikimedia.org/")
+    assert league.attributes["competition"]["logo"] == "/ligatracker_frontend/logos/bl1.png"
     assert league.attributes["last"]["name"] == "1. Spieltag"
     (played,) = league.attributes["last"]["matches"]
     assert played["score"] == [1, 2] and played["finished"] is True

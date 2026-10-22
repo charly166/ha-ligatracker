@@ -14,7 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_integration
 
 from .api import OpenLigaDBClient
-from .const import COMPETITIONS, CONF_LEAGUES, CONF_TEAMS, DOMAIN
+from .const import BUNDLED_LOGOS, COMPETITIONS, CONF_LEAGUES, CONF_TEAMS, DOMAIN, STATIC_BASE_URL
 from .coordinator import LigaTrackerCoordinator
 
 PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
@@ -22,7 +22,6 @@ PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
 type LigaTrackerConfigEntry = ConfigEntry[LigaTrackerCoordinator]
 
 _CARD_FILES = ("ligatracker-team-card.js", "ligatracker-league-card.js")
-_CARD_BASE_URL = "/ligatracker_frontend"
 _DATA_CARD_REGISTERED = f"{DOMAIN}_card_registered"
 
 
@@ -32,15 +31,20 @@ async def _async_register_card(hass: HomeAssistant) -> None:
         return
     hass.data[_DATA_CARD_REGISTERED] = True
     folder = Path(__file__).parent / "frontend"
+    logos = Path(__file__).parent / "logos"
     await hass.http.async_register_static_paths(
         [
-            StaticPathConfig(f"{_CARD_BASE_URL}/{name}", str(folder / name), cache_headers=False)
+            StaticPathConfig(f"{STATIC_BASE_URL}/{name}", str(folder / name), cache_headers=False)
             for name in _CARD_FILES
+        ]
+        + [
+            StaticPathConfig(f"{STATIC_BASE_URL}/logos/{name}", str(logos / name), cache_headers=False)
+            for name in BUNDLED_LOGOS.values()
         ]
     )
     version = (await async_get_integration(hass, DOMAIN)).version
     for name in _CARD_FILES:
-        add_extra_js_url(hass, f"{_CARD_BASE_URL}/{name}?v={version}")
+        add_extra_js_url(hass, f"{STATIC_BASE_URL}/{name}?v={version}")
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: LigaTrackerConfigEntry) -> bool:

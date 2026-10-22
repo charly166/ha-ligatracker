@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from homeassistant.components.image import ImageEntity
+from pathlib import Path
+
+from homeassistant.components.image import ImageEntity, infer_image_type
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import LigaTrackerConfigEntry
-from .const import COMPETITION_LOGOS
+from .const import BUNDLED_LOGOS, COMPETITION_LOGOS
 from .coordinator import LigaTrackerCoordinator
 from .entity import LeagueEntity, TeamEntity
 from .logos import get_logo_cache
@@ -72,5 +74,15 @@ class LeagueLogo(_CachedLogo, LeagueEntity):
         LeagueEntity.__init__(self, coordinator, comp_key)
         ImageEntity.__init__(self, coordinator.hass)
         self._attr_unique_id = f"{self._base_id}_logo"
-        self._attr_image_url = COMPETITION_LOGOS[comp_key]
+        self._bundled = BUNDLED_LOGOS.get(comp_key)
+        # Bundled logos are read from the integration folder; the others come from the disk cache.
+        self._attr_image_url = None if self._bundled else COMPETITION_LOGOS[comp_key]
         self._attr_image_last_updated = dt_util.utcnow()
+
+    async def async_image(self) -> bytes | None:
+        if not self._bundled:
+            return await super().async_image()
+        path = Path(__file__).parent / "logos" / self._bundled
+        content = await self.hass.async_add_executor_job(path.read_bytes)
+        self._attr_content_type = infer_image_type(content) or "image/png"
+        return content

@@ -53,9 +53,11 @@ matchday: next                        # next (default) or last
 name: Bundesliga                      # optional
 ```
 
-League logos are public-domain logos/wordmarks from Wikimedia Commons (OpenLigaDB has none).
-Home Assistant downloads them once, caches them (`.storage/ligatracker_logos`) and serves them as
-the league's image entity, which the card uses.
+League logos: Bundesliga, 2. Bundesliga and DFB-Pokal ship with the integration
+(`custom_components/ligatracker/logos/`). 3. Liga, Champions League, Europa League, Conference League
+and the national team come from Wikimedia Commons; Home Assistant downloads them once and caches
+them (`.storage/ligatracker_logos`). All are served as the league's image entity, which the card
+uses. OpenLigaDB has no league logos.
 
 ## Notes
 

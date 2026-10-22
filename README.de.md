@@ -73,9 +73,11 @@ Im Karten-Editor: „HA Liga Tracker Ligakarte“. Der Spieltag ist der mit der 
 Partie; läuft er schon teilweise, steht er unter „nächster“ (mit den bereits gespielten Ergebnissen)
 und der davor unter „letzter“. Die Liga muss im Setup unter „Ligen“ gewählt sein.
 
-Die Liga-Logos stammen von Wikimedia Commons (gemeinfreie Wortmarken bzw. Logos). OpenLigaDB selbst
-liefert keine. Home Assistant lädt sie einmal herunter, legt sie im Cache ab (`.storage/ligatracker_logos`)
-und stellt sie als Bild-Entität der Liga bereit; die Karte nutzt dieses Bild.
+Liga-Logos: Bundesliga, 2. Bundesliga und DFB-Pokal sind in der Integration enthalten
+(`custom_components/ligatracker/logos/`). 3. Liga, Champions League, Europa League, Conference League
+und Nationalmannschaft stammen von Wikimedia Commons; Home Assistant lädt sie einmal herunter und legt
+sie im Cache ab (`.storage/ligatracker_logos`). Alle werden als Bild-Entität der Liga bereitgestellt,
+die Karte nutzt dieses Bild. OpenLigaDB selbst liefert keine Liga-Logos.
 
 ## Hinweise
 
