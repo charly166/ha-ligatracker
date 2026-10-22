@@ -40,6 +40,10 @@ It shows the team with logo, its league (table position, last and next match wit
 teams' logos) and further competitions (cup, European cups) in the same layout. Hard-reload
 the browser once after the first update.
 
+<p align="center">
+  <img src="docs/team-card.png" alt="Team card for VfB Stuttgart" width="340">
+</p>
+
 ## League card
 
 Shows the league logo and name as the header, then all matches of the **next** or **last**
@@ -52,6 +56,13 @@ entity: sensor.bundesliga_matchdays   # the league's Matchdays sensor
 matchday: next                        # next (default) or last
 name: Bundesliga                      # optional
 ```
+
+<p align="center">
+  <img src="docs/league-card-next.png" alt="League card: next Champions League matchday" width="300">
+  &nbsp;
+  <img src="docs/league-card-last.png" alt="League card: last Bundesliga matchday" width="300">
+</p>
+<p align="center"><sub>Left: next matchday (Champions League), right: last matchday (Bundesliga)</sub></p>
 
 League logos: all logos ship with the integration (`custom_components/ligatracker/logos/`, square
 PNGs with a margin so the image entity does not crop them) and are served by Home Assistant itself,

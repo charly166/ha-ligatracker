@@ -56,6 +56,10 @@ name: VfB Stuttgart                      # optional
 Im Karten-Editor erscheint sie als „HA Liga Tracker Mannschaftskarte“. Nach dem ersten Update
 einmal hart neu laden (Strg+F5).
 
+<p align="center">
+  <img src="docs/team-card.png" alt="Mannschaftskarte VfB Stuttgart" width="340">
+</p>
+
 ## Ligakarte
 
 Zeigt für eine gewählte Liga das Liga-Logo mit Namen als Überschrift und darunter alle Partien des
@@ -68,6 +72,13 @@ entity: sensor.bundesliga_spieltage   # Spieltage-Sensor der Liga
 matchday: next                        # next (Standard) oder last
 name: Bundesliga                      # optional
 ```
+
+<p align="center">
+  <img src="docs/league-card-next.png" alt="Ligakarte: nächster Spieltag der Champions League" width="300">
+  &nbsp;
+  <img src="docs/league-card-last.png" alt="Ligakarte: letzter Spieltag der Bundesliga" width="300">
+</p>
+<p align="center"><sub>Links: nächster Spieltag (Champions League), rechts: letzter Spieltag (Bundesliga)</sub></p>
 
 Im Karten-Editor: „HA Liga Tracker Ligakarte“. Der Spieltag ist der mit der frühesten noch offenen
 Partie; läuft er schon teilweise, steht er unter „nächster“ (mit den bereits gespielten Ergebnissen)
