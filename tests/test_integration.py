@@ -124,6 +124,17 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert logo is not None and logo.state != "unavailable"
     assert hass.states.get("calendar.bundesliga") is not None  # league calendar
 
+    overview = hass.states.get("sensor.vfb_stuttgart_overview")
+    assert overview is not None and overview.state == "1"
+    assert overview.attributes["team"]["logo"] == "https://example.com/vfb.png"
+    (comp,) = overview.attributes["competitions"]
+    assert comp["key"] == "bl1" and comp["league"] is True
+    assert comp["table"]["position"] == 3
+    assert comp["last"]["score"] == [1, 2] and comp["last"]["result"] == "win"
+    assert comp["last"]["team_is_home"] is False
+    assert comp["next"]["home"] == "VfB Stuttgart" and comp["next"]["score"] is None
+    assert comp["live"] is None
+
 
 async def test_deselected_team_and_league_are_removed(hass: HomeAssistant) -> None:
     entry = MockConfigEntry(

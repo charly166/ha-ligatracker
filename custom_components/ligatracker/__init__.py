@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.loader import async_get_integration
 
 from .api import OpenLigaDBClient
 from .const import COMPETITIONS, CONF_LEAGUES, CONF_TEAMS, DOMAIN
@@ -16,8 +21,25 @@ PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
 
 type LigaTrackerConfigEntry = ConfigEntry[LigaTrackerCoordinator]
 
+_CARD_URL = "/ligatracker_frontend/ligatracker-team-card.js"
+_DATA_CARD_REGISTERED = f"{DOMAIN}_card_registered"
+
+
+async def _async_register_card(hass: HomeAssistant) -> None:
+    """Serve the bundled team card and load it in the frontend (once per run)."""
+    if hass.data.get(_DATA_CARD_REGISTERED):
+        return
+    hass.data[_DATA_CARD_REGISTERED] = True
+    path = Path(__file__).parent / "frontend" / "ligatracker-team-card.js"
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(_CARD_URL, str(path), cache_headers=False)]
+    )
+    version = (await async_get_integration(hass, DOMAIN)).version
+    add_extra_js_url(hass, f"{_CARD_URL}?v={version}")
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: LigaTrackerConfigEntry) -> bool:
+    await _async_register_card(hass)
     client = OpenLigaDBClient(async_get_clientsession(hass))
     coordinator = LigaTrackerCoordinator(hass, entry, client)
     await coordinator.async_config_entry_first_refresh()

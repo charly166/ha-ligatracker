@@ -91,6 +91,9 @@
           "home": "Home",
           "away": "Away"
         }
+      },
+      "overview": {
+        "name": "Overview"
       }
     },
     "image": {

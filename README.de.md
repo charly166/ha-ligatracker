@@ -36,7 +36,25 @@ Pro Mannschaft entsteht ein Gerät mit:
 | `sensor.<team>_spielstatus` | `live` während eines Spiels, sonst `idle`; Attribut `score`. |
 | `sensor.<team>_tabellenplatz_<wettbewerb>` | Tabellenplatz inkl. Punkte, Tore usw. (Ligen und Ligaphase der Europapokale). |
 
+| `sensor.<team>_ubersicht` | Diagnose-Sensor mit allen Wettbewerben der Mannschaft als Attribut (Datenquelle der Karte). |
+
 Pro gewählter Liga entsteht ein Gerät mit einem Kalender (`calendar.<liga>`) aller Partien.
+
+## Mannschaftskarte
+
+Die Integration bringt eine Lovelace-Karte mit, die beim Start automatisch geladen wird
+(kein manuelles Eintragen unter „Ressourcen“). Sie zeigt pro Mannschaft: Name mit Logo, die Liga
+mit Tabellenplatz sowie letztem und nächstem Spiel (mit Logos beider Mannschaften), darunter
+„Weitere Wettbewerbe“ (DFB-Pokal, Europapokal …) mit demselben Aufbau.
+
+```yaml
+type: custom:ligatracker-team-card
+entity: sensor.vfb_stuttgart_ubersicht   # Übersicht-Sensor der Mannschaft
+name: VfB Stuttgart                      # optional
+```
+
+Im Karten-Editor erscheint sie als „Liga Tracker Mannschaftskarte“. Nach dem ersten Update
+einmal hart neu laden (Strg+F5).
 
 ## Hinweise
 

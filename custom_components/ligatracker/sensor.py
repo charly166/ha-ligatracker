@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
@@ -15,6 +16,7 @@ from .const import COMPETITIONS
 from .coordinator import LigaTrackerCoordinator
 from .entity import TeamEntity
 from .model import Match, last_match, live_match, next_match
+from .overview import build_overview
 
 
 async def async_setup_entry(
@@ -29,6 +31,7 @@ async def async_setup_entry(
             NextMatchSensor(coordinator, team_id),
             LastMatchSensor(coordinator, team_id),
             MatchStatusSensor(coordinator, team_id),
+            OverviewSensor(coordinator, team_id),
             MatchFieldSensor(coordinator, team_id, "next", "opponent"),
             MatchFieldSensor(coordinator, team_id, "next", "competition"),
             MatchFieldSensor(coordinator, team_id, "last", "opponent"),
@@ -186,6 +189,38 @@ class MatchFieldSensor(TeamEntity, SensorEntity):
         if self._field == "home_away":
             return {"opponent": match.opponent(self.team_id).name, "competition": match.comp_name}
         return {"home": match.is_home(self.team_id), "competition": match.comp_name}
+
+
+class OverviewSensor(TeamEntity, SensorEntity):
+    """All competitions of a team in one structured attribute; data source of the team card."""
+
+    _attr_translation_key = "overview"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _unrecorded_attributes = frozenset({"team", "competitions"})
+
+    def __init__(self, coordinator: LigaTrackerCoordinator, team_id: int) -> None:
+        super().__init__(coordinator, team_id)
+        self._attr_unique_id = f"{self._base_id}_overview"
+
+    def _overview(self) -> dict[str, Any]:
+        data = self.coordinator.data
+        return build_overview(
+            self.team_id,
+            self.coordinator.teams[self.team_id],
+            self.coordinator.team_icon(self.team_id),
+            data.matches if data else {},
+            data.tables if data else {},
+            dt_util.utcnow(),
+        )
+
+    @property
+    def native_value(self) -> int:
+        """Number of competitions the team plays in."""
+        return len(self._overview()["competitions"])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return self._overview()
 
 
 class MatchStatusSensor(TeamLogoPictureMixin, TeamEntity, SensorEntity):

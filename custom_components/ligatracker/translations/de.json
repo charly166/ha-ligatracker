@@ -91,6 +91,9 @@
           "home": "Heimspiel",
           "away": "Auswärtsspiel"
         }
+      },
+      "overview": {
+        "name": "Übersicht"
       }
     },
     "image": {

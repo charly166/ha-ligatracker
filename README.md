@@ -23,7 +23,22 @@ Both can be changed later via *Configure*.
 Per team (one device each): `image` (club logo, also used as entity picture and attribute `team_logo`), `calendar` (all matches, result appended to the title once
 finished), `Next match` (timestamp), `Last result` (own goals first, e.g. `2:1`), `Next/Last opponent`, `Next/Last competition`, `Next/Last match home/away`, `Match status`
 (`live` / `idle`) and `Table position <competition>` for leagues and league phases.
+An `Overview` diagnostic sensor holds all competitions of the team (data source of the card).
 Per selected league: one device with a `calendar` of all its matches.
+
+## Team card
+
+The integration ships a Lovelace card and loads it automatically (no manual resource needed):
+
+```yaml
+type: custom:ligatracker-team-card
+entity: sensor.vfb_stuttgart_overview   # the team's Overview sensor
+name: VfB Stuttgart                     # optional
+```
+
+It shows the team with logo, its league (table position, last and next match with both
+teams' logos) and further competitions (cup, European cups) in the same layout. Hard-reload
+the browser once after the first update.
 
 ## Notes
 
