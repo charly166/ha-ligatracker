@@ -11,7 +11,7 @@ from .api import OpenLigaDBClient
 from .const import CONF_LEAGUES, CONF_TEAMS
 from .coordinator import LigaTrackerCoordinator
 
-PLATFORMS = [Platform.CALENDAR, Platform.SENSOR]
+PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
 
 type LigaTrackerConfigEntry = ConfigEntry[LigaTrackerCoordinator]
 

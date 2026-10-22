@@ -77,6 +77,25 @@
       },
       "last_competition": {
         "name": "Letzter Wettbewerb"
+      },
+      "next_home_away": {
+        "name": "Nächstes Spiel Heim/Auswärts",
+        "state": {
+          "home": "Heimspiel",
+          "away": "Auswärtsspiel"
+        }
+      },
+      "last_home_away": {
+        "name": "Letztes Spiel Heim/Auswärts",
+        "state": {
+          "home": "Heimspiel",
+          "away": "Auswärtsspiel"
+        }
+      }
+    },
+    "image": {
+      "logo": {
+        "name": "Vereinslogo"
       }
     }
   }

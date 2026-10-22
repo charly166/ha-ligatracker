@@ -33,6 +33,8 @@ async def async_setup_entry(
             MatchFieldSensor(coordinator, team_id, "next", "competition"),
             MatchFieldSensor(coordinator, team_id, "last", "opponent"),
             MatchFieldSensor(coordinator, team_id, "last", "competition"),
+            MatchFieldSensor(coordinator, team_id, "next", "home_away"),
+            MatchFieldSensor(coordinator, team_id, "last", "home_away"),
         ]
     async_add_entities(entities)
 
@@ -55,9 +57,21 @@ async def async_setup_entry(
     entry.async_on_unload(coordinator.async_add_listener(_add_tables))
 
 
-def _match_attrs(match: Match, team_id: int) -> dict[str, Any]:
+class TeamLogoPictureMixin:
+    """Shows the team's own logo as the entity picture."""
+
+    coordinator: LigaTrackerCoordinator
+    team_id: int
+
+    @property
+    def entity_picture(self) -> str | None:
+        return self.coordinator.team_icon(self.team_id)
+
+
+def _match_attrs(match: Match, team_id: int, team_logo: str | None = None) -> dict[str, Any]:
     opponent = match.opponent(team_id)
     return {
+        "team_logo": team_logo,
         "competition": match.comp_name,
         "matchday": match.group,
         "opponent": opponent.name,
@@ -70,7 +84,7 @@ def _match_attrs(match: Match, team_id: int) -> dict[str, Any]:
     }
 
 
-class NextMatchSensor(TeamEntity, SensorEntity):
+class NextMatchSensor(TeamLogoPictureMixin, TeamEntity, SensorEntity):
     _attr_translation_key = "next_match"
     _attr_device_class = SensorDeviceClass.TIMESTAMP
 
@@ -89,10 +103,10 @@ class NextMatchSensor(TeamEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
         match = self._match()
-        return _match_attrs(match, self.team_id) if match else None
+        return _match_attrs(match, self.team_id, self.coordinator.team_icon(self.team_id)) if match else None
 
 
-class LastMatchSensor(TeamEntity, SensorEntity):
+class LastMatchSensor(TeamLogoPictureMixin, TeamEntity, SensorEntity):
     """Result of the last finished match, own goals first (e.g. "2:1")."""
 
     _attr_translation_key = "last_match"
@@ -116,7 +130,7 @@ class LastMatchSensor(TeamEntity, SensorEntity):
         if not match or match.final is None:
             return None
         own, opp = match.score_for(self.team_id, match.final)
-        return _match_attrs(match, self.team_id) | {
+        return _match_attrs(match, self.team_id, self.coordinator.team_icon(self.team_id)) | {
             "score_home": match.final[0],
             "score_away": match.final[1],
             "result": "win" if own > opp else "loss" if own < opp else "draw",
@@ -134,6 +148,9 @@ class MatchFieldSensor(TeamEntity, SensorEntity):
         self._field = field
         self._attr_translation_key = f"{which}_{field}"
         self._attr_unique_id = f"{self._base_id}_{which}_{field}"
+        if field == "home_away":
+            self._attr_device_class = SensorDeviceClass.ENUM
+            self._attr_options = ["home", "away"]
 
     def _match(self) -> Match | None:
         matches = self.coordinator.team_matches(self.team_id)
@@ -148,6 +165,8 @@ class MatchFieldSensor(TeamEntity, SensorEntity):
             return None
         if self._field == "competition":
             return match.comp_name
+        if self._field == "home_away":
+            return "home" if match.is_home(self.team_id) else "away"
         return match.opponent(self.team_id).name
 
     @property
@@ -164,10 +183,12 @@ class MatchFieldSensor(TeamEntity, SensorEntity):
             return None
         if self._field == "competition":
             return {"matchday": match.group}
+        if self._field == "home_away":
+            return {"opponent": match.opponent(self.team_id).name, "competition": match.comp_name}
         return {"home": match.is_home(self.team_id), "competition": match.comp_name}
 
 
-class MatchStatusSensor(TeamEntity, SensorEntity):
+class MatchStatusSensor(TeamLogoPictureMixin, TeamEntity, SensorEntity):
     """`live` while a match of the team is running, otherwise `idle`."""
 
     _attr_translation_key = "match_status"
@@ -191,7 +212,7 @@ class MatchStatusSensor(TeamEntity, SensorEntity):
         if not match:
             return None
         score = match.score_for(self.team_id, match.live)
-        return _match_attrs(match, self.team_id) | {
+        return _match_attrs(match, self.team_id, self.coordinator.team_icon(self.team_id)) | {
             "score": f"{score[0]}:{score[1]}" if score else None,
         }
 

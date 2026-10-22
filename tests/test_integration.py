@@ -20,7 +20,8 @@ def _auto_enable(enable_custom_integrations):
 
 
 def _team(tid: int, name: str) -> dict:
-    return {"teamId": tid, "teamName": name, "shortName": name, "teamIconUrl": "data:image/png;base64,AAAA"}
+    icon = "https://example.com/vfb.png" if tid == 16 else "data:image/png;base64,AAAA"
+    return {"teamId": tid, "teamName": name, "shortName": name, "teamIconUrl": icon}
 
 
 def _match(mid: int, kickoff: datetime, t1, t2, finished: bool, score=None) -> dict:
@@ -111,7 +112,14 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert hass.states.get("sensor.vfb_stuttgart_next_opponent").state == "Borussia Mönchengladbach"
     assert hass.states.get("sensor.vfb_stuttgart_next_competition").state == "Bundesliga"
 
+    assert hass.states.get("sensor.vfb_stuttgart_next_match_home_away").state == "home"
+    assert hass.states.get("sensor.vfb_stuttgart_last_match_home_away").state == "away"
+
     assert hass.states.get("sensor.vfb_stuttgart_match_status").state == "idle"
     assert hass.states.get("sensor.vfb_stuttgart_table_position_bundesliga").state == "3"
     assert hass.states.get("calendar.vfb_stuttgart") is not None
+    assert last.attributes["team_logo"] == "https://example.com/vfb.png"
+    assert last.attributes["entity_picture"] == "https://example.com/vfb.png"
+    logo = hass.states.get("image.vfb_stuttgart_logo")
+    assert logo is not None and logo.state != "unavailable"
     assert hass.states.get("calendar.bundesliga") is not None  # league calendar

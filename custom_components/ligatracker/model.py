@@ -79,6 +79,9 @@ def _team(raw: dict[str, Any]) -> Team:
     # Some entries embed huge data: URIs - never put those into state attributes.
     if not (isinstance(icon, str) and icon.startswith(("http://", "https://"))):
         icon = None
+    elif icon.startswith("http://img.uefa.com/"):
+        # served over https as well; avoids mixed-content blocking in the browser
+        icon = "https://" + icon[len("http://") :]
     name = raw.get("teamName") or "?"
     return Team(int(raw["teamId"]), name.strip(), (raw.get("shortName") or name).strip(), icon)
 

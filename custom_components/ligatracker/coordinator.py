@@ -68,6 +68,15 @@ class LigaTrackerCoordinator(DataUpdateCoordinator[LigaData]):
         out.sort(key=lambda m: m.kickoff)
         return out
 
+    def team_icon(self, team_id: int) -> str | None:
+        """Logo URL of a team; the icon differs between competitions, prefer https."""
+        icons = [
+            (m.team1 if m.team1.id == team_id else m.team2).icon
+            for m in self.team_matches(team_id)
+        ]
+        icons = [i for i in icons if i]
+        return next((i for i in icons if i.startswith("https://")), icons[0] if icons else None)
+
     def league_matches(self, key: str) -> list[Match]:
         return self.data.matches.get(key, []) if self.data else []
 

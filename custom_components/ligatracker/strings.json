@@ -77,6 +77,25 @@
       },
       "last_competition": {
         "name": "Last competition"
+      },
+      "next_home_away": {
+        "name": "Next match home/away",
+        "state": {
+          "home": "Home",
+          "away": "Away"
+        }
+      },
+      "last_home_away": {
+        "name": "Last match home/away",
+        "state": {
+          "home": "Home",
+          "away": "Away"
+        }
+      }
+    },
+    "image": {
+      "logo": {
+        "name": "Logo"
       }
     }
   }
