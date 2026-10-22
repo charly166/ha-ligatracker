@@ -30,13 +30,11 @@ FULL_REFRESH_INTERVAL: Final = timedelta(minutes=15)
 # (all curated competitions are scanned, then only the relevant ones are polled).
 DISCOVERY_INTERVAL: Final = timedelta(hours=24)
 
-# Competition logos are not part of the OpenLigaDB data. They are public-domain wordmarks /
-# logos on Wikimedia Commons that the card loads directly in the browser.
-_COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/"
-
-
-def commons_logo(filename: str, width: int = 256) -> str:
-    return f"{_COMMONS}{filename.replace(' ', '_')}?width={width}"
+# Competition logos are not part of the OpenLigaDB data. These are public-domain logos /
+# wordmarks on Wikimedia Commons, as direct thumbnail URLs (Special:FilePath is rate-limited
+# by Wikimedia and answers HTTP 429). The integration downloads them once and serves them
+# through the league's image entity.
+_THUMB = "https://upload.wikimedia.org/wikipedia/commons/thumb/"
 
 
 # Curated competitions. OpenLigaDB is community maintained and the shortcuts are
@@ -70,12 +68,12 @@ COMPETITIONS: Final[dict[str, dict]] = {
 }
 
 COMPETITION_LOGOS: Final[dict[str, str]] = {
-    "bl1": commons_logo("Bundesliga logo.svg"),
-    "bl2": commons_logo("2. Bundesliga Wordmark.svg"),
-    "bl3": commons_logo("3. Liga Wordmark.svg"),
-    "dfb": commons_logo("DFB-Pokal Wordmark.svg"),
-    "ucl": commons_logo("UEFA Champions League logo.svg"),
-    "uel": commons_logo("UEFA Europa League logo (2024 version).svg"),
-    "uecl": commons_logo("UEFA Conference League logo (2024 version).svg"),
-    "nat": commons_logo("DFB-Logo 2025.svg"),
+    "bl1": _THUMB + "1/15/Bundesliga_logo.svg/330px-Bundesliga_logo.svg.png",
+    "bl2": _THUMB + "5/58/2._Bundesliga_Wordmark.svg/330px-2._Bundesliga_Wordmark.svg.png",
+    "bl3": _THUMB + "e/ec/3._Liga_Wordmark.svg/330px-3._Liga_Wordmark.svg.png",
+    "dfb": _THUMB + "2/2a/DFB-Pokal_Wordmark.svg/330px-DFB-Pokal_Wordmark.svg.png",
+    "ucl": _THUMB + "0/0a/UEFA_Champions_League_logo.svg/330px-UEFA_Champions_League_logo.svg.png",
+    "uel": _THUMB + "1/1b/UEFA_Europa_League_logo_%282024_version%29.svg/330px-UEFA_Europa_League_logo_%282024_version%29.svg.png",
+    "uecl": _THUMB + "2/26/UEFA_Conference_League_logo_%282024_version%29.svg/330px-UEFA_Conference_League_logo_%282024_version%29.svg.png",
+    "nat": _THUMB + "1/10/DFB-Logo_2025.svg/330px-DFB-Logo_2025.svg.png",
 }

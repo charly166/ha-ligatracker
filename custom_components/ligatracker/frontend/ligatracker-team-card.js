@@ -227,7 +227,7 @@
   window.customCards = window.customCards || [];
   window.customCards.push({
     type: "ligatracker-team-card",
-    name: "Liga Tracker Mannschaftskarte",
+    name: "HA Liga Tracker Mannschaftskarte",
     description: "Mannschaft mit Logo, Liga und weitere Wettbewerbe mit Tabellenplatz, letztem und nächstem Spiel",
     preview: false,
   });

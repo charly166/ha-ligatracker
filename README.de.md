@@ -38,7 +38,7 @@ Pro Mannschaft entsteht ein Gerät mit:
 
 | `sensor.<team>_ubersicht` | Diagnose-Sensor mit allen Wettbewerben der Mannschaft als Attribut (Datenquelle der Karte). |
 
-Pro gewählter Liga entsteht ein Gerät mit einem Kalender (`calendar.<liga>`) aller Partien und einem Diagnose-Sensor „Spieltage“ (`sensor.<liga>_spieltage`) mit dem letzten und nächsten Spieltag (Datenquelle der Ligakarte).
+Pro gewählter Liga entsteht ein Gerät mit einem Kalender (`calendar.<liga>`) aller Partien und einem Diagnose-Sensor „Spieltage“ (`sensor.<liga>_spieltage`) mit dem letzten und nächsten Spieltag (Datenquelle der Ligakarte) sowie einer Bild-Entität „Liga-Logo“ (`image.<liga>_liga_logo`).
 
 ## Mannschaftskarte
 
@@ -53,7 +53,7 @@ entity: sensor.vfb_stuttgart_ubersicht   # Übersicht-Sensor der Mannschaft
 name: VfB Stuttgart                      # optional
 ```
 
-Im Karten-Editor erscheint sie als „Liga Tracker Mannschaftskarte“. Nach dem ersten Update
+Im Karten-Editor erscheint sie als „HA Liga Tracker Mannschaftskarte“. Nach dem ersten Update
 einmal hart neu laden (Strg+F5).
 
 ## Ligakarte
@@ -69,12 +69,13 @@ matchday: next                        # next (Standard) oder last
 name: Bundesliga                      # optional
 ```
 
-Im Karten-Editor: „Liga Tracker Ligakarte“. Der Spieltag ist der mit der frühesten noch offenen
+Im Karten-Editor: „HA Liga Tracker Ligakarte“. Der Spieltag ist der mit der frühesten noch offenen
 Partie; läuft er schon teilweise, steht er unter „nächster“ (mit den bereits gespielten Ergebnissen)
 und der davor unter „letzter“. Die Liga muss im Setup unter „Ligen“ gewählt sein.
 
-Die Liga-Logos stammen von Wikimedia Commons (gemeinfreie Wortmarken bzw. Logos) und werden
-direkt im Browser geladen. OpenLigaDB selbst liefert keine Liga-Logos.
+Die Liga-Logos stammen von Wikimedia Commons (gemeinfreie Wortmarken bzw. Logos). OpenLigaDB selbst
+liefert keine. Home Assistant lädt sie einmal herunter, legt sie im Cache ab (`.storage/ligatracker_logos`)
+und stellt sie als Bild-Entität der Liga bereit; die Karte nutzt dieses Bild.
 
 ## Hinweise
 

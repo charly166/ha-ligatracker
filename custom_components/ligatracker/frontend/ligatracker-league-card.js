@@ -154,6 +154,20 @@
       }
     }
 
+    // The league's image entity (same device as the sensor) is served by Home Assistant itself,
+    // which is more reliable than hot-linking; fall back to the plain URL otherwise.
+    _leagueLogo(comp) {
+      const hass = this._hass;
+      const ents = hass.entities || {};
+      const me = ents[this._config.entity];
+      if (me && me.device_id) {
+        const img = Object.values(ents).find((e) => e.device_id === me.device_id && e.translation_key === "league_logo");
+        const st = img && hass.states[img.entity_id];
+        if (st && st.attributes && st.attributes.entity_picture) return st.attributes.entity_picture;
+      }
+      return comp.logo;
+    }
+
     _logo(url) {
       return url
         ? `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`
@@ -192,8 +206,9 @@
         const which = this._which();
         const day = a[which];
         const name = this._config.name || comp.name || "";
-        const logo = comp.logo
-          ? `<div class="logo"><img src="${esc(comp.logo)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.style.display='none'"></div>`
+        const logoUrl = this._leagueLogo(comp);
+        const logo = logoUrl
+          ? `<div class="logo"><img src="${esc(logoUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.style.display='none'"></div>`
           : "";
         const sub = `${esc(t[which])}${day && day.name ? " · " + esc(day.name) : ""}`;
         const head = `<div class="head">${logo}<div class="titles"><div class="title">${esc(name)}</div><div class="sub">${sub}</div></div></div>`;
@@ -224,7 +239,7 @@
   window.customCards = window.customCards || [];
   window.customCards.push({
     type: "ligatracker-league-card",
-    name: "Liga Tracker Ligakarte",
+    name: "HA Liga Tracker Ligakarte",
     description: "Liga mit Logo und allen Partien des nächsten oder letzten Spieltags",
     preview: false,
   });

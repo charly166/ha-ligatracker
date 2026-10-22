@@ -102,6 +102,9 @@
     "image": {
       "logo": {
         "name": "Logo"
+      },
+      "league_logo": {
+        "name": "League logo"
       }
     }
   }

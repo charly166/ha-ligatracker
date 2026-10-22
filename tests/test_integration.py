@@ -135,10 +135,14 @@ async def test_entities(hass: HomeAssistant) -> None:
     assert comp["next"]["home"] == "VfB Stuttgart" and comp["next"]["score"] is None
     assert comp["live"] is None
 
+    league_logo = hass.states.get("image.bundesliga_league_logo")
+    assert league_logo is not None and league_logo.state != "unavailable"
+    assert league_logo.attributes["entity_picture"].startswith("/api/image_proxy/image.bundesliga_league_logo")
+
     league = hass.states.get("sensor.bundesliga_matchdays")
     assert league is not None and league.state == "2. Spieltag"  # next matchday
     assert league.attributes["competition"]["name"] == "Bundesliga"
-    assert league.attributes["competition"]["logo"].startswith("https://commons.wikimedia.org/")
+    assert league.attributes["competition"]["logo"].startswith("https://upload.wikimedia.org/")
     assert league.attributes["last"]["name"] == "1. Spieltag"
     (played,) = league.attributes["last"]["matches"]
     assert played["score"] == [1, 2] and played["finished"] is True

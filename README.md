@@ -24,7 +24,7 @@ Per team (one device each): `image` (club logo, also used as entity picture and 
 finished), `Next match` (timestamp), `Last result` (own goals first, e.g. `2:1`), `Next/Last opponent`, `Next/Last competition`, `Next/Last match home/away`, `Match status`
 (`live` / `idle`) and `Table position <competition>` for leagues and league phases.
 An `Overview` diagnostic sensor holds all competitions of the team (data source of the card).
-Per selected league: one device with a `calendar` of all its matches and a `Matchdays` diagnostic sensor (data source of the league card).
+Per selected league: one device with a `calendar` of all its matches and a `Matchdays` diagnostic sensor (data source of the league card) and a `League logo` image entity.
 
 ## Team card
 
@@ -53,8 +53,9 @@ matchday: next                        # next (default) or last
 name: Bundesliga                      # optional
 ```
 
-League logos are public-domain logos/wordmarks from Wikimedia Commons loaded by the browser;
-OpenLigaDB itself has no league logos.
+League logos are public-domain logos/wordmarks from Wikimedia Commons (OpenLigaDB has none).
+Home Assistant downloads them once, caches them (`.storage/ligatracker_logos`) and serves them as
+the league's image entity, which the card uses.
 
 ## Notes
 

@@ -25,7 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 
 RETRY_AFTER = 30 * 60  # seconds before a failed download is tried again
 MAX_BYTES = 2 * 1024 * 1024
-USER_AGENT = "HA-Liga-Tracker (Home Assistant custom integration)"
+# Wikimedia asks for a descriptive User-Agent with a way to reach the operator.
+USER_AGENT = "HA-Liga-Tracker/1.0 (+https://github.com/charly166/ha-ligatracker)"
 
 
 class LogoCache:
