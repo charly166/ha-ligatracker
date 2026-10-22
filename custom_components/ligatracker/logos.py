@@ -8,6 +8,8 @@ dashboard refresh or integration reload.
 from __future__ import annotations
 
 import asyncio
+import base64
+import binascii
 from hashlib import sha1
 import logging
 from pathlib import Path
@@ -87,6 +89,19 @@ class LogoCache:
             return None
         self._failed.pop(url, None)
         return content
+
+
+def decode_data_uri(uri: str) -> tuple[bytes, str] | None:
+    """Decode a `data:image/...;base64,...` URI into (bytes, content type)."""
+    try:
+        header, payload = uri.split(",", 1)
+        content_type = header[len("data:") :].split(";", 1)[0]
+        content = base64.b64decode(payload, validate=False)
+    except (ValueError, binascii.Error):
+        return None
+    if infer_image_type(content) is None:
+        return None
+    return content, content_type
 
 
 def get_logo_cache(hass: HomeAssistant) -> LogoCache:

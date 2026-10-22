@@ -16,6 +16,7 @@ from homeassistant.loader import async_get_integration
 from .api import OpenLigaDBClient
 from .const import BUNDLED_LOGOS, COMPETITIONS, CONF_LEAGUES, CONF_TEAMS, DOMAIN, STATIC_BASE_URL
 from .coordinator import LigaTrackerCoordinator
+from .views import TeamLogoView
 
 PLATFORMS = [Platform.CALENDAR, Platform.IMAGE, Platform.SENSOR]
 
@@ -42,6 +43,7 @@ async def _async_register_card(hass: HomeAssistant) -> None:
             for name in BUNDLED_LOGOS.values()
         ]
     )
+    hass.http.register_view(TeamLogoView())
     version = (await async_get_integration(hass, DOMAIN)).version
     for name in _CARD_FILES:
         add_extra_js_url(hass, f"{STATIC_BASE_URL}/{name}?v={version}")

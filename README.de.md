@@ -85,5 +85,7 @@ die Karte nutzt dieses Bild. OpenLigaDB selbst liefert keine Liga-Logos.
   Freiwilligen ab** und ist je Wettbewerb unterschiedlich.
 - Während eines Spiels einer gewählten Mannschaft wird minütlich, sonst alle 15 Minuten
   aktualisiert. Liga-Kalender folgen dem 15-Minuten-Takt.
+- Manche Vereinslogos liefert OpenLigaDB als eingebettetes Bild statt als Adresse (z. B. Arsenal, Aston Villa,
+  Porto). Die Integration stellt sie unter `/ligatracker_frontend/team-logo/<id>` bereit.
 - Die OpenLigaDB-Kürzel sind nicht einheitlich (`ucl`, `uel2026`, …). Die Integration wählt je
   Wettbewerb automatisch das Kürzel mit den meisten Spielen.

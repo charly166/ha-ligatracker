@@ -63,3 +63,5 @@ which the card uses. OpenLigaDB has no league logos.
 OpenLigaDB is community maintained. Results appear a few minutes after the final whistle; live
 scores during a match depend on the volunteers and vary by competition. Polling: every minute
 while a selected team is playing, otherwise every 15 minutes.
+Some club logos are embedded as images (not URLs) in the OpenLigaDB data (e.g. Arsenal, Aston Villa,
+Porto); the integration serves them at `/ligatracker_frontend/team-logo/<id>`.

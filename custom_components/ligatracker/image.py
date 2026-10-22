@@ -13,7 +13,8 @@ from . import LigaTrackerConfigEntry
 from .const import BUNDLED_LOGOS
 from .coordinator import LigaTrackerCoordinator
 from .entity import LeagueEntity, TeamEntity
-from .logos import get_logo_cache
+from .logos import decode_data_uri, get_logo_cache
+from .model import EMBEDDED_LOGOS, embedded_logo_url
 
 
 async def async_setup_entry(
@@ -42,6 +43,17 @@ class _CachedLogo(ImageEntity):
 
 class TeamLogo(_CachedLogo, TeamEntity):
     """Club logo, usable in picture cards and as a source for dashboards."""
+
+    async def async_image(self) -> bytes | None:
+        # Logos that OpenLigaDB embeds as data: URIs are not downloadable; serve them directly.
+        if (uri := EMBEDDED_LOGOS.get(self.team_id)) and self._attr_image_url == embedded_logo_url(
+            self.team_id
+        ):
+            if logo := decode_data_uri(uri):
+                content, self._attr_content_type = logo
+                return content
+            return None
+        return await super().async_image()
 
     _attr_translation_key = "logo"
 

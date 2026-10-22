@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from .const import MATCH_WINDOW, PRE_KICKOFF
+from .const import MATCH_WINDOW, PRE_KICKOFF, STATIC_BASE_URL
 
 
 def current_season(now: datetime) -> int:
@@ -75,16 +76,34 @@ class TableRow:
     goal_difference: int
 
 
+# Some OpenLigaDB teams have their logo embedded as a base64 data: URI instead of a URL. Putting
+# those into state attributes would be huge, so they are kept here (team id -> data URI) and the
+# team gets a short URL served by the integration (see views.py).
+EMBEDDED_LOGOS: dict[int, str] = {}
+_DATA_URI = re.compile(r"^data:image/(?:png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=\s]+$")
+_MAX_EMBEDDED = 300_000
+
+
+def embedded_logo_url(team_id: int) -> str:
+    return f"{STATIC_BASE_URL}/team-logo/{team_id}"
+
+
 def _team(raw: dict[str, Any]) -> Team:
+    team_id = int(raw["teamId"])
     icon = raw.get("teamIconUrl")
-    # Some entries embed huge data: URIs - never put those into state attributes.
-    if not (isinstance(icon, str) and icon.startswith(("http://", "https://"))):
+    if isinstance(icon, str) and icon.startswith("data:"):
+        if len(icon) <= _MAX_EMBEDDED and _DATA_URI.match(icon):
+            EMBEDDED_LOGOS[team_id] = icon
+            icon = embedded_logo_url(team_id)
+        else:
+            icon = None
+    elif not (isinstance(icon, str) and icon.startswith(("http://", "https://"))):
         icon = None
     elif icon.startswith("http://img.uefa.com/"):
         # served over https as well; avoids mixed-content blocking in the browser
         icon = "https://" + icon[len("http://") :]
     name = raw.get("teamName") or "?"
-    return Team(int(raw["teamId"]), name.strip(), (raw.get("shortName") or name).strip(), icon)
+    return Team(team_id, name.strip(), (raw.get("shortName") or name).strip(), icon)
 
 
 def parse_match(raw: dict[str, Any], comp_key: str, comp_name: str) -> Match | None:

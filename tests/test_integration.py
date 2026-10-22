@@ -101,7 +101,7 @@ async def test_entities(hass: HomeAssistant) -> None:
     last = hass.states.get("sensor.vfb_stuttgart_last_result")
     assert last is not None and last.state == "2:1"  # Stuttgart won away: own goals first
     assert last.attributes["result"] == "win"
-    assert last.attributes["opponent_logo"] is None  # data: URIs are dropped
+    assert last.attributes["opponent_logo"] == "/ligatracker_frontend/team-logo/87"  # embedded logo -> short URL
 
     nxt = hass.states.get("sensor.vfb_stuttgart_next_match")
     assert nxt is not None and nxt.state != "unknown"
