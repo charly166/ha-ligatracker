@@ -4,6 +4,9 @@
   "codeowners": [
     "@charly166"
   ],
+  "categories": [
+    "media_entertainment"
+  ],
   "config_flow": true,
   "dependencies": [
     "frontend",
