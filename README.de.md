@@ -2,6 +2,12 @@
   <img src="HA_Liga_Tracker.png" alt="HA Liga Tracker" width="480">
 </p>
 
+<p align="center">
+  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Default-41BDF5.svg" alt="hacs_badge"></a>
+  <a href="https://github.com/charly166/ha-ligatracker/releases"><img src="https://img.shields.io/github/v/release/charly166/ha-ligatracker" alt="GitHub Release"></a>
+  <a href="https://github.com/charly166/ha-ligatracker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/charly166/ha-ligatracker" alt="License"></a>
+</p>
+
 # HA Liga Tracker
 
 Fußball-Spielplan, Ergebnisse und Tabellenplätze deiner Lieblingsmannschaften in Home Assistant –
